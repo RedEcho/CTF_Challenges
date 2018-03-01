@@ -74,21 +74,3 @@ int main(int argc, char** argv) {
     }
     return returnValue;
 }
-
-
-
-// <=>
-
-// char1 == char5 - 4
-// char2 == 0x33
-// char3 == char4 + 16
-// char4 == 0x6f - 4
-// char5 = char4 - 2
-
-// <=>
-
-// char1 == 0x6a -> "j"
-// char2 == 0x33 -> "3"
-// char3 == 0x7a -> "z"
-// char4 == 0x6b -> "k"
-// char5 == 0x6d -> "m"
