@@ -7,30 +7,35 @@ Everything you need is on this repository, including my python scripts and a dec
 
 ### Table of content
 
-- [Write-up - "EzReverse" challenge - EasyCTF_IV](#write-up---ezreverse-challenge---easyctfiv)
-        - [1. Introduction](#1-introduction)
-                - [Table of content](#table-of-content)
-                - [What You'll need to follow along](#what-youll-need-to-follow-along)
-        - [2. First analysis, or the chmod conundrum](#2-first-analysis-or-the-chmod-conundrum)
-                - [2.1 `file`](#21-file)
-                - [2.2 `hexdump`](#22-hexdump)
-                - [2.3 `strings`](#23-strings)
-                - [2.4 **`chmod`**, or facepalm moment](#24-chmod-or-facepalm-moment)
-                - [2.5 First runs](#25-first-runs)
-        - [3. What does this mess do?](#3-what-does-this-mess-do)
-                - [3.1 How to disassemble tho?](#31-how-to-disassemble-tho)
-                - [3.2 **radare2** FTW!](#32-radare2-ftw)
-                - [3.3 Now, you just have to understand...](#33-now-you-just-have-to-understand)
-        - [4. Bruteforce baby!](#4-bruteforce-baby)
-                - [4.1 Patch Time](#41-patch-time)
-                - [4.2 Bruteforce Script](#42-bruteforce-script)
-                - [4.3 Bruteforce Attack](#43-bruteforce-attack)
-        - [5. Let's try the smart way](#5-lets-try-the-smart-way)
-                - [5.1 Decompiling the binary](#51-decompiling-the-binary)
-                - [5.2 Cleanup and thoughts](#52-cleanup-and-thoughts)
-                - [5.3 Solving the mystery](#53-solving-the-mystery)
-        - [6. Bonus : solving with z3](#6-bonus-solving-with-z3)
-        - [7. Conclusion](#7-conclusion)
+1. [Introduction](#1-introduction)
+   - [Table of content](#table-of-content)
+   - [What You'll need to follow along](#what-youll-need-to-follow-along)
+        
+2. [First analysis, or the chmod conundrum](#2-first-analysis-or-the-chmod-conundrum)
+   1. [`file`](#21-file)
+   2. [`hexdump`](#22-hexdump)
+   3. [`strings`](#23-strings)
+   4. [**`chmod`**, or facepalm moment](#24-chmod-or-facepalm-moment)
+   5. [First runs](#25-first-runs)
+        
+3. [What does this mess do?](#3-what-does-this-mess-do)
+   1. [How to disassemble tho?](#31-how-to-disassemble-tho)
+   2. [**radare2** FTW!](#32-radare2-ftw)
+   3. [Now, you just have to understand...](#33-now-you-just-have-to-understand)
+        
+4. [Bruteforce baby!](#4-bruteforce-baby)
+   1. [Patch Time](#41-patch-time)
+   2. [Bruteforce Script](#42-bruteforce-script)
+   3. [Bruteforce Attack](#43-bruteforce-attack)
+        
+5. [Let's try the smart way](#5-lets-try-the-smart-way)
+   1. [Decompiling the binary](#51-decompiling-the-binary)
+   2. [Cleanup and thoughts](#52-cleanup-and-thoughts)
+   3. [Solving the mystery](#53-solving-the-mystery)
+        
+6. [Bonus : solving with z3](#6-bonus--solving-with-z3)
+
+7. [Conclusion](#7-conclusion)
 
 ### What You'll need to follow along
 
