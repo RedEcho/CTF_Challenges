@@ -47,7 +47,7 @@ Everything you need is on this repository, including my python scripts and a dec
 
 Depending on your skill on each topic, a good day to a good week of googling should give you everything you need to tag along! Also, if you are new to this or simply a bit rusty, I can't recommend enough [this youtube playlist](https://www.youtube.com/watch?v=iyAyN3GFM7A&list=PLhixgUqwRTjxglIswKp9mpkfPNfHkzyeN) by [LiveOverflow](https://www.youtube.com/channel/UClcE-kVhqyiHCcjYwcpfj9w). Watch it to at least the 8th video, practice a little bit with the examples he gives and you'll have no problem understanding this write-up.
 
-I started with a brand new Fedora 27 Virtual Machine, and not much else. I [downloaded the binary](https://github.com/KosBeg/ctf-writeups/raw/master/EasyCTF_IV/ez_rev/executable) from [CTFTime](https://ctftime.org/task/5365), noticed that a write-up already existed, promised myself to not read it and started right away.
+I started with a brand new Fedora 27 Virtual Machine, and not much else. I [downloaded the binary](./executable) from [CTFTime](https://ctftime.org/task/5365), noticed that a write-up already existed, promised myself to not read it and started right away.
 
 ## 2. First analysis, or the chmod conundrum
 
@@ -141,11 +141,11 @@ Yeah, I may have overestimated myself a bit here, I have no idea WTF this is. St
 
 ### 2.3 `strings`
 
-Who know, maybe, since it's an easy challenge, the flag is coded in the binary, which is itself corrupted so no one can actually run it. The [**`strings`**](http://man7.org/linux/man-pages/man1/strings.1.html) command goes through the whole file and only outputs what it thinks a human could read. Let's try it!
+Who knows, since it's an easy challenge, maybe the flag is coded in the binary, which is itself corrupted so no one can actually run it. The [**`strings`**](http://man7.org/linux/man-pages/man1/strings.1.html) command goes through the whole file and only outputs what it thinks a human could read. Let's try it!
 
 ![strings command output. Lots of cools stuff here!](./Pictures/5365_3.png)
 
-Well that's what I call progress. Some interesting strings, obviously (even though it's no flag), but some function and other names I recognize from my C days :
+Well that's what I call progress. Some interesting strings, obviously (even though it's no flag), especially some function and other names I recognize from my C days :
 
 - `puts()`
 - `printf()`
@@ -332,7 +332,7 @@ And I got this :
 
 ### 3.3 Now, you just have to understand...
 
-The key here is not to try to understand each individual line of code, you won't succeed. Just try to understand how the code flows, what instructions are executed after which one, what path does the code take... After a bit of thinking, I highlighted every `goto` instructions (which are in fact `jump` instructions that radare2 modified for us to make it more clear. That's what the `ams.pseudo` is doing, among other things). you could also use the `VV` command to see a graph representation of the program flow, that may be more visual.
+The key here is not to try to understand each individual line of code, you won't succeed. Just try to understand how the code flows, what instructions are executed after which one, what path does the code take... After a bit of thinking, I highlighted every `goto` instructions (which are in fact `jump` instructions that radare2 modified for us to make it more clear. That's what the `ams.pseudo` is doing, among other things). You could also use the `VV` command to see a graph representation of the program flow, that may be more visual.
 
 1. The beginning does some stuff, then, at the address `0x00400867`, checks if a value equals 2. In some cases (I'm not sure which one it is), it jumps to the end of the program and nothing happens. Well, that exactly the behavior we encountered at the beginning, when we ran the program without an argument. So this beginning just sets up some stuff, then checks if an argument has been passed. If not, then it jumps to the end and the program just stops.
 2. Then, we get some pretty complex logic, and a series of jumps that all lead to the same place, namely `0x00400967`.
@@ -343,7 +343,7 @@ I now have a basic understanding of how this program behaves. I could try to rea
 
 ## 4. Bruteforce baby!
 
-Do you remember [why we could not try to pass random combinations of characters until we find the good one](###2.5-first-runs)? The program would delete itself. what if I could simply remove this instruction at `0x0040097c` that keeps deleting our binary file if we don't pass the checks, and just simply try (a lot of) random letters? Well that's exactly what I did, for the better and (_especially_) for the worse.
+Do you remember [why we could not try to pass random combinations of characters until we find the good one](#25-first-runs)? The program would delete itself. what if I could simply remove this instruction at `0x0040097c` that keeps deleting our binary file if we don't pass the checks, and just simply try (a lot of) random letters? Well that's exactly what I did, for the better and (_especially_) for the worse.
 
 ### 4.1 Patch Time
 
@@ -419,7 +419,7 @@ Uh oh... So I initially didn't have the progress bar telling me the remaining ti
 
 ![This is simply way too much time](./Pictures/5365_11.png)
 
-This kind of attack may be possible if I ran a compiled C script on a native OS, with a huge processor. But my crappy Python code running on a small 2 cores virtual machine won't cut it.
+This kind of attack may be possible if I ran a compiled C program on a very fast processor. But my crappy Python code running on a small 2 cores virtual machine won't cut it.
 
 At this point, I'll need more information on the expected argument, to narrow down my bruteforce attack, or simply just find it first time, by understanding the disassembled code.
 
@@ -508,8 +508,8 @@ int main(int arg0, int arg1) {
 }
 ```
 
-First of all, it's important to understand that this is no clean C code. GCC would throws thousands of errors while trying to parse that. But it's still way more understandable than the asm code, and that was the goal. So I'm not going to clean it up to make it pretty, or to compile it, I'm just trying to understand how it works.
-Also, at this point, it my be worth looking into the other write-up for this challenge I mentioned in the beginning. As it happens, the author, [KosBeg](https://github.com/KosBeg) owns a IDA license, and you can see how he didn't have too much work to do to cleanup his [decompiled C code](https://github.com/KosBeg/ctf-writeups/tree/master/EasyCTF_IV/ez_rev). Well, mine is not as nice, but still workable, and I didn't watch his stuff because I really wanted to do it myself. So lets start the cleanup !
+It's important to understand that this is no clean C code. GCC would throws thousands of errors while trying to parse that. But it's still way more understandable than the asm code, and that was the goal. So I'm not goig to try to make it compilable, I'll just try to understand how it works.
+Also, at this point, it my be worth looking into the other write-up for this challenge I mentioned in the beginning. As it happens, the author, [KosBeg](https://github.com/KosBeg), owns a IDA license. You can see how he didn't have too much work to do to cleanup his [decompiled C code](https://github.com/KosBeg/ctf-writeups/tree/master/EasyCTF_IV/ez_rev). Well, mine is not as nice, but still workable, and I didn't watch his stuff yet because I really wanted to do it myself. So lets start the cleanup !
 
 ``` c
 int PrintFlag(int* flagAddress) {
@@ -591,7 +591,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-Now that's more readable isn't it ? THe most interesting part happens just after the else statement. The program filters the argument, the adds 1 to the first character, 2 to the second, 3 to the third, 4 to the fourth, and 5 to the fifth. Then, it verifies some conditions, and if those are satisfied, it print the flag.
+Now that's more readable isn't it ? The most interesting part happens just after the else statement. The program filters the argument, the adds 1 to the first character, 2 to the second, 3 to the third, 4 to the fourth, and 5 to the fifth. Then, it verifies some conditions, and if those are satisfied, it print the flag.
 
 One thing to remember is that the characters in the conditions have been altered above. So char4 == 0x6f in fact checks if the fourth character we passed **plus four** equals 0x6f. Following this principle, we can write a list of constraints our argument must follow.
 
@@ -599,7 +599,7 @@ One thing to remember is that the characters in the conditions have been altered
 
 And here is what I ended up with :
 
-``` shell
+```
 (char1 + 1) == (char5 + 5) - 0xa
 (char2 + 2) == 0x35
 (char3 + 3) == (char4 + 4) + 0xe
@@ -609,7 +609,7 @@ And here is what I ended up with :
 
 Well, now that's just some elementary school arithmetics. Just remember what is hexadecimal and what is decimal. Let's solve this step by step.
 
-``` shell
+```
 char1 == char5 - 4              char1 == 0x6a
 char2 == 0x33                   char2 == 0x33
 char3 == char4 + 16     <=>     char3 == 0x7a
