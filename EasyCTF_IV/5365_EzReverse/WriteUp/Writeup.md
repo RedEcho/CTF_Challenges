@@ -1,15 +1,16 @@
 # Write-up - "EzReverse" challenge - EasyCTF_IV
 
-## 1. Introduction 
+## 1. Introduction
 
 This is my first real challenge, and as such, it too me around 20h to solve. Instead of showing the *best* way to find the flag, I'll explain my thought process and show my mistakes, so that you, the reader, can learn from both. Since this is an *easy* challenge, this write-up is primarily targeted to newbies like me, although I'm sure a more experienced reverse engineers can get a laugh or two at my mistakes :).
 Everything you need is on this repository, including my python scripts and a decompiled c file. Just download and enjoy!
 
 ### Table of content
+
 - [Write-up - "EzReverse" challenge - EasyCTF_IV](#write-up---ezreverse-challenge---easyctfiv)
         - [1. Introduction](#1-introduction)
                 - [Table of content](#table-of-content)
-                - [What You'll need to follow along :](#what-youll-need-to-follow-along)
+                - [What You'll need to follow along](#what-youll-need-to-follow-along)
         - [2. First analysis, or the chmod conundrum](#2-first-analysis-or-the-chmod-conundrum)
                 - [2.1 `file`](#21-file)
                 - [2.2 `hexdump`](#22-hexdump)
@@ -31,13 +32,13 @@ Everything you need is on this repository, including my python scripts and a dec
         - [6. Bonus : solving with z3](#6-bonus-solving-with-z3)
         - [7. Conclusion](#7-conclusion)
 
-### What You'll need to follow along :
+### What You'll need to follow along
 
-* Some basic programing knowledge (an introductory course to C or/and Python should be enough)
-* A basic understanding of Linux's CLI (ls, cd, echo... )
-* A basic understanding of how hexadecimal works (If you are able to count to 0xff, you ar good)
-* A basic understanding of how ASCII works (and an [ASCII table](https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange#/media/File:ASCII-Table-wide.svg))
-* A linux Virtual Machine
+- Some basic programing knowledge (an introductory course to C or/and Python should be enough)
+- A basic understanding of Linux's CLI (ls, cd, echo... )
+- A basic understanding of how hexadecimal works (If you are able to count to 0xff, you ar good)
+- A basic understanding of how ASCII works (and an [ASCII table](https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange#/media/File:ASCII-Table-wide.svg))
+- A linux Virtual Machine
 
 Depending on your skill on each topic, a good day to a good week of googling should give you everything you need to tag along! Also, if you are new to this or simply a bit rusty, I can't recommend enough [this youtube playlist](https://www.youtube.com/watch?v=iyAyN3GFM7A&list=PLhixgUqwRTjxglIswKp9mpkfPNfHkzyeN) by [LiveOverflow](https://www.youtube.com/channel/UClcE-kVhqyiHCcjYwcpfj9w). Watch it to at least the 8th video, practice a little bit with the examples he gives and you'll have no problem understanding this write-up.
 
@@ -65,7 +66,7 @@ Mmmmh. My modest knowledge tells me that this should work ok...
 
 ### 2.2 `hexdump`
 
-Fair enough, now let's [**`hexdump`**](http://man7.org/linux/man-pages/man1/hexdump.1.html) that bitch to see what it contains! `hexdump` is printing the actual zeros and ones that make the file, but converted in an hexadecimal format. Some numbers correspond to letters. The -C parameter shows those letters on the right.  
+Fair enough, now let's [**`hexdump`**](http://man7.org/linux/man-pages/man1/hexdump.1.html) that bitch to see what it contains! `hexdump` is printing the actual zeros and ones that make the file, but converted in an hexadecimal format. Some numbers correspond to letters. The -C parameter shows those letters on the right.
 
 ``` shell
 $ hexdump -C executable
@@ -140,21 +141,21 @@ Who know, maybe, since it's an easy challenge, the flag is coded in the binary, 
 
 Well that's what I call progress. Some interesting strings, obviously (even though it's no flag), but some function and other names I recognize from my C days :
 
-* `puts()`
-* `printf()`
-* `stdout()`
-* gcc...
+- `puts()`
+- `printf()`
+- `stdout()`
+- gcc...
 
 So this program must be written in C (or maybe C++, I saw a `libstdc++` string too). I gotta say the "`You thought you could avoid it huh?`" has me a little scared... Now, if I could just run it, that would be great.
 
 ### 2.4 [**`chmod`**](http://man7.org/linux/man-pages/man2/chmod.2.html), or facepalm moment
 
-On linux, you need to tell the system that the file is executable before running it. That is done with the `chmod +x nameOfTheFile` command. I am way too ashamed to tell you how long it took me to find/remember this... 
+On linux, you need to tell the system that the file is executable before running it. That is done with the `chmod +x nameOfTheFile` command. I am way too ashamed to tell you how long it took me to find/remember this...
 Now, let's try to run it.
 
 ``` shell
-$ chmod +x ./executable 
-$ ./executable 
+$ chmod +x ./executable
+$ ./executable
 $
 ```
 
@@ -180,7 +181,7 @@ I didn't try it at first, but later I found out that even if you press `CTRL + C
 ![CTRL + C won't save you here](./Pictures/5365_2.png)
 
 Still, it's an interesting behavior. It means that I cannot try a so called "bruteforce" attack, or I'll need to re download the binary after every failed attempt. I'll have to disassemble it and understand what it does to give it the argument it expects right away. I guess I'll take the challenge's hint :
- 
+
 > [**Objdump**](http://man7.org/linux/man-pages/man1/objdump.1.html) the executable and read some assembly
 
 ## 3. What does this mess do?
@@ -190,7 +191,7 @@ Still, it's an interesting behavior. It means that I cannot try a so called "bru
 Disassembling a program means finding the instructions the processor follows. It is usually written in a stupidly ugly and hard to follow language: the assembly (asm for short). [**Objdump**](http://man7.org/linux/man-pages/man1/objdump.1.html) is a program that can do this disassembly for us, and show us the asm code of the executable. Since it's been hinted at, let's try it! (I'll only show the disassembly of the main function here, but the output is much longer)
 
 ``` shell
-$ objdump -d executable 
+$ objdump -d executable
 
 executable:     file format elf64-x86-64
 
@@ -296,28 +297,28 @@ executable:     file format elf64-x86-64
   400981:	bf 7e 0a 40 00       	mov    $0x400a7e,%edi
   400986:	e8 c5 fc ff ff       	callq  400650 <puts@plt>
   40098b:	b8 02 00 00 00       	mov    $0x2,%eax
-  400990:	c9                   	leaveq 
-  400991:	c3                   	retq   
+  400990:	c9                   	leaveq
+  400991:	c3                   	retq
   400992:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
-  400999:	00 00 00 
+  400999:	00 00 00
   40099c:	0f 1f 40 00          	nopl   0x0(%rax)
 
 [...]
 
 ```
 
-Nope. No way I'm reading this mess. I'll try to find an other way cause this is not doable at all. 
+Nope. No way I'm reading this mess. I'll try to find an other way cause this is not doable at all.
 
 ### 3.2 [**radare2**](https://github.com/radare/radare2) FTW!
 
 After much research on the internet, I ended up using [**radare2**](https://github.com/radare/radare2) to disassemble this binary. It's command line only, and the learning curve is a bit steep, but after a fair bit of messing around, I found those useful commands :
 
-* `r2 fileName` -> Opens the file to disassemble
-* `aaaa` -> *analyses* stuff. No idea but it's required.
-* `e asm.pseudo=true` -> will change the asm code to make it more *readable*
-* `afl` -> displays the list of functions radare2 found in the binary
-* `s main` -> seek to the beginning of the main function
-* `pdf`-> displays the asm code (and does **NOT** save it as a .pdf file :))
+- `r2 fileName` -> Opens the file to disassemble
+- `aaaa` -> *analyses* stuff. No idea but it's required.
+- `e asm.pseudo=true` -> will change the asm code to make it more *readable*
+- `afl` -> displays the list of functions radare2 found in the binary
+- `s main` -> seek to the beginning of the main function
+- `pdf`-> displays the asm code (and does **NOT** save it as a .pdf file :))
 
 And I got this :
 
@@ -328,8 +329,8 @@ And I got this :
 The key here is not to try to understand each individual line of code, you won't succeed. Just try to understand how the code flows, what instructions are executed after which one, what path does the code take... After a bit of thinking, I highlighted every `goto` instructions (which are in fact `jump` instructions that radare2 modified for us to make it more clear. That's what the `ams.pseudo` is doing, among other things). you could also use the `VV` command to see a graph representation of the program flow, that may be more visual.
 
 1. The beginning does some stuff, then, at the address `0x00400867`, checks if a value equals 2. In some cases (I'm not sure which one it is), it jumps to the end of the program and nothing happens. Well, that exactly the behavior we encountered at the beginning, when we ran the program without an argument. So this beginning just sets up some stuff, then checks if an argument has been passed. If not, then it jumps to the end and the program just stops.
-2. Then, we get some pretty complex logic, and a series of jumps that all lead to the same place, namely `0x00400967`. 
-3. If we did not jump, we end up at `0x00400945`, which calls a "printf()" with a very enticing "`Now here is your flag: `" string. That means we passed all the checks, and if we end up there, we are golden. But if we fail any of the checks, we end up at `0x00400967`.
+2. Then, we get some pretty complex logic, and a series of jumps that all lead to the same place, namely `0x00400967`.
+3. If we did not jump, we end up at `0x00400945`, which calls a "printf()" with a very enticing "`Now here is your flag:`" string. That means we passed all the checks, and if we end up there, we are golden. But if we fail any of the checks, we end up at `0x00400967`.
 4. At this address, we have a call to the very ominous `sym.imp.remove()` function, as well as a call to the `puts()` function, with this string : "`successfully deleted!`". That's what happens when we give a random argument to the program! it deletes itself, then writes "successfully deleted!".
 
 I now have a basic understanding of how this program behaves. I could try to read line by line the logic from `0x00400874` to `0x00400943`, and understand what the program wants as an input. But I'm really bad at asm and this looks like hard work. I have an other **(very bad)** idea.
@@ -342,9 +343,9 @@ Do you remember [why we could not try to pass random combinations of characters 
 
 [**radare2**](https://github.com/radare/radare2) allows us to modify a few lines of asm and reassemble our code. Here are the commands :
 
-* `r2 -w executable` -> open the binary with writing rights
-* `s 0x0040097c` -> seek to the annoying call address
-* `wao nop` -> replace the instruction here by a `nop` instruction, which does nothing.
+- `r2 -w executable` -> open the binary with writing rights
+- `s 0x0040097c` -> seek to the annoying call address
+- `wao nop` -> replace the instruction here by a `nop` instruction, which does nothing.
 
 Let's do the same for the sleep() instruction at `0x0040096d`. If the program doesn't wait a few seconds before it closes every time, our bruteforce attack will be much faster.
 
@@ -375,7 +376,7 @@ from sys import exit
 from tqdm import tqdm # fancy progressbar stuff
 
 guess = "" # string that will contain our argument
-chars = string.ascii_letters + string.digits # dictionnary of allowed characters
+chars = string.ascii_letters + string.digits # dictionary of allowed characters
 guessLength = 0 # length of the argument at the start. Increase to start with bigger password.
 
 print("\n\nBruteforce attack")
@@ -408,7 +409,7 @@ Let's run it !
 
 ![That'll take quite a while...](./Pictures/5365_10.png)
 
-Uh oh... So I initially didn't have the progress bar telling me the remaining time. SO I thought everything would be ok. After quite a while I found [tqdm](https://github.com/noamraph/tqdm), which was super easy to implement in my code, and gave me an expected remaining tiem. Turns out it's way too much. Remember that at this point I have no idea how long the expected argument is. Let's say it is 8 characters long. Well, that would give me around 236,000,000 hours to wait to try every combinations. So roughly 27,000 years. 
+Uh oh... So I initially didn't have the progress bar telling me the remaining time. SO I thought everything would be ok. After quite a while I found [tqdm](https://github.com/noamraph/tqdm), which was super easy to implement in my code, and gave me an expected remaining time. Turns out it's way too much. Remember that at this point I have no idea how long the expected argument is. Let's say it is 8 characters long. Well, that would give me around 236,000,000 hours to wait to try every combinations. So roughly 27,000 years.
 
 ![This is simply way too much time](./Pictures/5365_11.png)
 
@@ -501,7 +502,7 @@ int main(int arg0, int arg1) {
 }
 ```
 
-First of all, it's important to understand that this is no clean C code. GCC would throws thousands of errors while trying to parse that. But it's still way more understandable than the asm code, and that was the goal. So I'm not going to clean it up to make it pretty, or to compile it, I'm just trying to understand how it works. 
+First of all, it's important to understand that this is no clean C code. GCC would throws thousands of errors while trying to parse that. But it's still way more understandable than the asm code, and that was the goal. So I'm not going to clean it up to make it pretty, or to compile it, I'm just trying to understand how it works.
 Also, at this point, it my be worth looking into the other write-up for this challenge I mentioned in the beginning. As it happens, the author, [KosBeg](https://github.com/KosBeg) owns a IDA license, and you can see how he didn't have too much work to do to cleanup his [decompiled C code](https://github.com/KosBeg/ctf-writeups/tree/master/EasyCTF_IV/ez_rev). Well, mine is not as nice, but still workable, and I didn't watch his stuff because I really wanted to do it myself. So lets start the cleanup !
 
 ``` c
@@ -538,7 +539,7 @@ int main(int argc, char** argv) {
     inputAddress:// Address = Stack Pointer -48
 
     int returnValue;
-    inputAdress = argv;
+    inputAddress = argv;
 
     signal(2, *SIGINTHandler()); // signal needs a pointer to the function that is supposed to handle the signal, in our case SIGINTHandler()
     // *target = *inputAddress;  // No freakin idea what this target memory is for, so just comment out.
@@ -592,7 +593,7 @@ One thing to remember is that the characters in the conditions have been altered
 
 And here is what I ended up with :
 
-```
+``` shell
 (char1 + 1) == (char5 + 5) - 0xa
 (char2 + 2) == 0x35
 (char3 + 3) == (char4 + 4) + 0xe
@@ -602,7 +603,7 @@ And here is what I ended up with :
 
 Well, now that's just some elementary school arithmetics. Just remember what is hexadecimal and what is decimal. Let's solve this step by step.
 
-```
+``` shell
 char1 == char5 - 4              char1 == 0x6a
 char2 == 0x33                   char2 == 0x33
 char3 == char4 + 16     <=>     char3 == 0x7a
@@ -658,7 +659,7 @@ print(flag) # nice !
 ```
 
 And sure enough, that works too
-![z3 works fine too](./Pictues/5365_14.png)
+![z3 works fine too](./Pictures/5365_14.png)
 
 ## 7. Conclusion
 
