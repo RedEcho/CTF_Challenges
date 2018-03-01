@@ -1,0 +1,12 @@
+{
+    "python.pythonPath": "/bin/python3.6",
+    "python.linting.enabled": true,
+    "files.autoSave": "afterDelay",
+    "cSpell.words": [
+        "chmod",
+        "decompiler",
+        "decompilers",
+        "facepalm",
+        "hexdump"
+    ]
+}
