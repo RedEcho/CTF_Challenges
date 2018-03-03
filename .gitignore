@@ -1,2 +1,4 @@
 # Ignores VSCode folder
 /**/.vscode/*
+
+maketask.sh
